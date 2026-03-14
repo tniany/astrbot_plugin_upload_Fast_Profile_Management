@@ -1,24 +1,26 @@
 from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
+from astrbot.api import AstrBotConfig
 
 @register("plugin_upload_Fast_Profile_Management", "浅月tniay", "快捷人格管理器", "1.0.0")
 class FastProfileManagement(Star):
-    def __init__(self, context: Context):
+    def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
-        # 使用 context 的配置管理功能
         self.context = context
+        self.config = config
 
     async def initialize(self):
         """插件初始化方法"""
         # 初始化配置
-        if not await self.context.config.get("admin_ids"):
-            await self.context.config.set("admin_ids", [])
+        if not self.config.get("admin_ids"):
+            self.config["admin_ids"] = []
+            self.config.save_config()
 
     async def is_admin(self, event: AstrMessageEvent) -> bool:
         """检查用户是否为管理员"""
         user_id = event.get_sender_id()
-        admin_ids = await self.context.config.get("admin_ids", [])
+        admin_ids = self.config.get("admin_ids", [])
         return str(user_id) in admin_ids
 
     @filter.command("profile")
@@ -75,19 +77,25 @@ class FastProfileManagement(Star):
     async def list_profiles(self, event: AstrMessageEvent):
         """查看当前人格列表"""
         try:
-            # 使用 context 提供的方法获取人格列表
-            profiles = await self.context.ai.get_profiles()
-            if not profiles:
+            # 使用 persona_manager 获取人格列表
+            personas = self.context.persona_manager.get_all_personas()
+            if not personas:
                 yield event.plain_result("当前没有人格")
                 return
 
-            current_profile = await self.context.ai.get_current_profile()
+            # 获取当前会话的人格
+            umo = event.unified_msg_origin
+            conv_mgr = self.context.conversation_manager
+            curr_cid = await conv_mgr.get_curr_conversation_id(umo)
+            conversation = await conv_mgr.get_conversation(umo, curr_cid)
+            current_persona_id = conversation.persona_id if conversation else None
+
             response = "当前人格列表：\n"
-            for profile in profiles:
-                if profile["name"] == current_profile["name"]:
-                    response += f"• {profile['name']} (当前)\n"
+            for persona in personas:
+                if persona.persona_id == current_persona_id:
+                    response += f"• {persona.persona_id} (当前)\n"
                 else:
-                    response += f"• {profile['name']}\n"
+                    response += f"• {persona.persona_id}\n"
             yield event.plain_result(response)
         except Exception as e:
             logger.error(f"获取人格列表失败: {e}")
@@ -96,12 +104,18 @@ class FastProfileManagement(Star):
     async def switch_profile(self, event: AstrMessageEvent, profile_name: str):
         """切换人格"""
         try:
-            # 使用 context 提供的方法切换人格
-            success = await self.context.ai.switch_profile(profile_name)
-            if success:
-                yield event.plain_result(f"成功切换到人格：{profile_name}")
-            else:
+            # 检查人格是否存在
+            persona = self.context.persona_manager.get_persona(profile_name)
+            if not persona:
                 yield event.plain_result(f"切换人格失败，人格 {profile_name} 不存在")
+                return
+
+            # 切换到指定人格
+            umo = event.unified_msg_origin
+            conv_mgr = self.context.conversation_manager
+            curr_cid = await conv_mgr.get_curr_conversation_id(umo)
+            await conv_mgr.update_conversation(umo, curr_cid, persona_id=profile_name)
+            yield event.plain_result(f"成功切换到人格：{profile_name}")
         except Exception as e:
             logger.error(f"切换人格失败: {e}")
             yield event.plain_result("切换人格失败")
@@ -109,12 +123,20 @@ class FastProfileManagement(Star):
     async def add_profile(self, event: AstrMessageEvent, profile_name: str, profile_desc: str):
         """添加人格"""
         try:
-            # 使用 context 提供的方法添加人格
-            success = await self.context.ai.add_profile(profile_name, profile_desc)
-            if success:
-                yield event.plain_result(f"成功添加人格：{profile_name}")
-            else:
+            # 检查人格是否已存在
+            existing_persona = self.context.persona_manager.get_persona(profile_name)
+            if existing_persona:
                 yield event.plain_result(f"添加人格失败，人格 {profile_name} 已存在")
+                return
+
+            # 添加新人格
+            self.context.persona_manager.create_persona(
+                persona_id=profile_name,
+                system_prompt=profile_desc,
+                begin_dialogs=[],
+                tools=None
+            )
+            yield event.plain_result(f"成功添加人格：{profile_name}")
         except Exception as e:
             logger.error(f"添加人格失败: {e}")
             yield event.plain_result("添加人格失败")
@@ -122,26 +144,18 @@ class FastProfileManagement(Star):
     async def remove_profile(self, event: AstrMessageEvent, profile_name: str):
         """删除人格"""
         try:
-            # 使用 context 提供的方法删除人格
-            success = await self.context.ai.remove_profile(profile_name)
-            if success:
-                yield event.plain_result(f"成功删除人格：{profile_name}")
-            else:
+            # 检查人格是否存在
+            persona = self.context.persona_manager.get_persona(profile_name)
+            if not persona:
                 yield event.plain_result(f"删除人格失败，人格 {profile_name} 不存在")
+                return
+
+            # 删除人格
+            self.context.persona_manager.delete_persona(profile_name)
+            yield event.plain_result(f"成功删除人格：{profile_name}")
         except Exception as e:
             logger.error(f"删除人格失败: {e}")
             yield event.plain_result("删除人格失败")
-
-    def get_config_schema(self):
-        """获取插件配置schema"""
-        return {
-            "admin_ids": {
-                "type": "array",
-                "title": "管理员ID列表",
-                "description": "只有列表中的用户可以使用此插件",
-                "default": []
-            }
-        }
 
     async def terminate(self):
         """插件销毁方法"""

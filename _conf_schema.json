@@ -1,0 +1,8 @@
+{
+  "admin_ids": {
+    "type": "list",
+    "title": "管理员ID列表",
+    "description": "只有列表中的用户可以使用此插件",
+    "default": []
+  }
+}
