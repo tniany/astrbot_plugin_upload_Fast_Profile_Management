@@ -1,26 +1,24 @@
 from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
-from astrbot.api.config import Config
-from astrbot.api.ai import AI
 
 @register("plugin_upload_Fast_Profile_Management", "浅月tniay", "快捷人格管理器", "1.0.0")
 class FastProfileManagement(Star):
     def __init__(self, context: Context):
         super().__init__(context)
-        self.config = Config(context)
-        self.ai = AI(context)
+        # 使用 context 的配置管理功能
+        self.context = context
 
     async def initialize(self):
         """插件初始化方法"""
         # 初始化配置
-        if not await self.config.get("admin_ids"):
-            await self.config.set("admin_ids", [])
+        if not await self.context.config.get("admin_ids"):
+            await self.context.config.set("admin_ids", [])
 
     async def is_admin(self, event: AstrMessageEvent) -> bool:
         """检查用户是否为管理员"""
         user_id = event.get_sender_id()
-        admin_ids = await self.config.get("admin_ids", [])
+        admin_ids = await self.context.config.get("admin_ids", [])
         return str(user_id) in admin_ids
 
     @filter.command("profile")
@@ -77,12 +75,13 @@ class FastProfileManagement(Star):
     async def list_profiles(self, event: AstrMessageEvent):
         """查看当前人格列表"""
         try:
-            profiles = await self.ai.get_profiles()
+            # 使用 context 提供的方法获取人格列表
+            profiles = await self.context.ai.get_profiles()
             if not profiles:
                 yield event.plain_result("当前没有人格")
                 return
 
-            current_profile = await self.ai.get_current_profile()
+            current_profile = await self.context.ai.get_current_profile()
             response = "当前人格列表：\n"
             for profile in profiles:
                 if profile["name"] == current_profile["name"]:
@@ -97,7 +96,8 @@ class FastProfileManagement(Star):
     async def switch_profile(self, event: AstrMessageEvent, profile_name: str):
         """切换人格"""
         try:
-            success = await self.ai.switch_profile(profile_name)
+            # 使用 context 提供的方法切换人格
+            success = await self.context.ai.switch_profile(profile_name)
             if success:
                 yield event.plain_result(f"成功切换到人格：{profile_name}")
             else:
@@ -109,7 +109,8 @@ class FastProfileManagement(Star):
     async def add_profile(self, event: AstrMessageEvent, profile_name: str, profile_desc: str):
         """添加人格"""
         try:
-            success = await self.ai.add_profile(profile_name, profile_desc)
+            # 使用 context 提供的方法添加人格
+            success = await self.context.ai.add_profile(profile_name, profile_desc)
             if success:
                 yield event.plain_result(f"成功添加人格：{profile_name}")
             else:
@@ -121,7 +122,8 @@ class FastProfileManagement(Star):
     async def remove_profile(self, event: AstrMessageEvent, profile_name: str):
         """删除人格"""
         try:
-            success = await self.ai.remove_profile(profile_name)
+            # 使用 context 提供的方法删除人格
+            success = await self.context.ai.remove_profile(profile_name)
             if success:
                 yield event.plain_result(f"成功删除人格：{profile_name}")
             else:
