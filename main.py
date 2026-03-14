@@ -63,8 +63,16 @@ class FastProfileManagement(Star):
     async def list_profiles(self, event: AstrMessageEvent):
         """查看当前人格列表"""
         try:
+            # 检查 persona_manager 是否存在
+            if not hasattr(self.context, 'persona_manager'):
+                logger.error("persona_manager 不存在")
+                yield event.plain_result("获取人格列表失败：persona_manager 不存在")
+                return
+
             # 使用 persona_manager 获取人格列表
             personas = self.context.persona_manager.get_all_personas()
+            logger.info(f"获取到的人格列表: {[p.persona_id for p in personas] if personas else '空'}")
+            
             if not personas:
                 yield event.plain_result("当前没有人格")
                 return
@@ -75,6 +83,7 @@ class FastProfileManagement(Star):
             curr_cid = await conv_mgr.get_curr_conversation_id(umo)
             conversation = await conv_mgr.get_conversation(umo, curr_cid)
             current_persona_id = conversation.persona_id if conversation else None
+            logger.info(f"当前会话的人格ID: {current_persona_id}")
 
             response = "当前人格列表：\n"
             for persona in personas:
