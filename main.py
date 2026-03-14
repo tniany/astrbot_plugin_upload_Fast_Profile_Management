@@ -1,78 +1,76 @@
 from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
-from astrbot.api import AstrBotConfig
 
 @register("plugin_upload_Fast_Profile_Management", "浅月tniay", "快捷人格管理器", "1.0.0")
 class FastProfileManagement(Star):
-    def __init__(self, context: Context, config: AstrBotConfig):
+    def __init__(self, context: Context):
         super().__init__(context)
         self.context = context
-        self.config = config
 
     async def initialize(self):
         """插件初始化方法"""
-        # 初始化配置
-        if not self.config.get("admin_ids"):
-            self.config["admin_ids"] = []
-            self.config.save_config()
+        pass
 
     async def is_admin(self, event: AstrMessageEvent) -> bool:
         """检查用户是否为管理员"""
-        user_id = event.get_sender_id()
-        admin_ids = self.config.get("admin_ids", [])
-        return str(user_id) in admin_ids
+        # 暂时返回 True，允许所有用户使用，后续可以通过配置文件或其他方式实现权限控制
+        return True
 
     @filter.command("profile")
     @filter.command("人格")
     async def profile_command(self, event: AstrMessageEvent):
         """人格管理指令，支持查看、切换、添加、删除人格"""
-        # 检查权限
-        if not await self.is_admin(event):
-            yield event.plain_result("权限不足，仅限管理员使用")
-            return
-
-        message_str = event.message_str.strip()
-        args = message_str.split(" ")
-
-        if len(args) < 2:
-            yield event.plain_result("用法：/profile|/人格 list|switch|add|remove <参数> 或 /profile|/人格 列表|切换|添加|删除 <参数>")
-            return
-
-        subcommand = args[1]
-
-        # 中文命令映射
-        subcommand_map = {
-            "列表": "list",
-            "切换": "switch",
-            "添加": "add",
-            "删除": "remove"
-        }
-
-        if subcommand in subcommand_map:
-            subcommand = subcommand_map[subcommand]
-
-        if subcommand == "list":
-            await self.list_profiles(event)
-        elif subcommand == "switch":
-            if len(args) < 3:
-                yield event.plain_result("用法：/profile switch <人格名称> 或 /人格 切换 <人格名称>")
+        try:
+            # 检查权限
+            if not await self.is_admin(event):
+                yield event.plain_result("权限不足，仅限管理员使用")
                 return
-            await self.switch_profile(event, args[2])
-        elif subcommand == "add":
-            if len(args) < 4:
-                yield event.plain_result("用法：/profile add <人格名称> <人格描述> 或 /人格 添加 <人格名称> <人格描述>")
+
+            message_str = event.message_str.strip()
+            args = message_str.split(" ")
+
+            if len(args) < 2:
+                yield event.plain_result("用法：/profile|/人格 list|switch|add|remove <参数> 或 /profile|/人格 列表|切换|添加|删除 <参数>")
                 return
-            profile_name = args[2]
-            profile_desc = " ".join(args[3:])
-            await self.add_profile(event, profile_name, profile_desc)
-        elif subcommand == "remove":
-            if len(args) < 3:
-                yield event.plain_result("用法：/profile remove <人格名称> 或 /人格 删除 <人格名称>")
-                return
-            await self.remove_profile(event, args[2])
-        else:
-            yield event.plain_result("用法：/profile|/人格 list|switch|add|remove <参数> 或 /profile|/人格 列表|切换|添加|删除 <参数>")
+
+            subcommand = args[1]
+
+            # 中文命令映射
+            subcommand_map = {
+                "列表": "list",
+                "切换": "switch",
+                "添加": "add",
+                "删除": "remove"
+            }
+
+            if subcommand in subcommand_map:
+                subcommand = subcommand_map[subcommand]
+
+            if subcommand == "list":
+                await self.list_profiles(event)
+            elif subcommand == "switch":
+                if len(args) < 3:
+                    yield event.plain_result("用法：/profile switch <人格名称> 或 /人格 切换 <人格名称>")
+                    return
+                await self.switch_profile(event, args[2])
+            elif subcommand == "add":
+                if len(args) < 4:
+                    yield event.plain_result("用法：/profile add <人格名称> <人格描述> 或 /人格 添加 <人格名称> <人格描述>")
+                    return
+                profile_name = args[2]
+                profile_desc = " ".join(args[3:])
+                await self.add_profile(event, profile_name, profile_desc)
+            elif subcommand == "remove":
+                if len(args) < 3:
+                    yield event.plain_result("用法：/profile remove <人格名称> 或 /人格 删除 <人格名称>")
+                    return
+                await self.remove_profile(event, args[2])
+            else:
+                yield event.plain_result("用法：/profile|/人格 list|switch|add|remove <参数> 或 /profile|/人格 列表|切换|添加|删除 <参数>")
+        except Exception as e:
+            logger.error(f"命令执行失败: {e}")
+            yield event.plain_result("命令执行失败，请检查输入格式")
 
     async def list_profiles(self, event: AstrMessageEvent):
         """查看当前人格列表"""
