@@ -18,7 +18,6 @@ class FastProfileManagement(Star):
         return True
 
     @filter.command("profile")
-    @filter.command("人格")
     async def profile_command(self, event: AstrMessageEvent):
         """人格管理指令，支持查看、切换、添加、删除人格"""
         try:
@@ -31,43 +30,32 @@ class FastProfileManagement(Star):
             args = message_str.split(" ")
 
             if len(args) < 2:
-                yield event.plain_result("用法：/profile|/人格 list|switch|add|remove <参数> 或 /profile|/人格 列表|切换|添加|删除 <参数>")
+                yield event.plain_result("用法：/profile list|switch|add|remove <参数>")
                 return
 
             subcommand = args[1]
-
-            # 中文命令映射
-            subcommand_map = {
-                "列表": "list",
-                "切换": "switch",
-                "添加": "add",
-                "删除": "remove"
-            }
-
-            if subcommand in subcommand_map:
-                subcommand = subcommand_map[subcommand]
 
             if subcommand == "list":
                 await self.list_profiles(event)
             elif subcommand == "switch":
                 if len(args) < 3:
-                    yield event.plain_result("用法：/profile switch <人格名称> 或 /人格 切换 <人格名称>")
+                    yield event.plain_result("用法：/profile switch <人格名称>")
                     return
                 await self.switch_profile(event, args[2])
             elif subcommand == "add":
                 if len(args) < 4:
-                    yield event.plain_result("用法：/profile add <人格名称> <人格描述> 或 /人格 添加 <人格名称> <人格描述>")
+                    yield event.plain_result("用法：/profile add <人格名称> <人格描述>")
                     return
                 profile_name = args[2]
                 profile_desc = " ".join(args[3:])
                 await self.add_profile(event, profile_name, profile_desc)
             elif subcommand == "remove":
                 if len(args) < 3:
-                    yield event.plain_result("用法：/profile remove <人格名称> 或 /人格 删除 <人格名称>")
+                    yield event.plain_result("用法：/profile remove <人格名称>")
                     return
                 await self.remove_profile(event, args[2])
             else:
-                yield event.plain_result("用法：/profile|/人格 list|switch|add|remove <参数> 或 /profile|/人格 列表|切换|添加|删除 <参数>")
+                yield event.plain_result("用法：/profile list|switch|add|remove <参数>")
         except Exception as e:
             logger.error(f"命令执行失败: {e}")
             yield event.plain_result("命令执行失败，请检查输入格式")
