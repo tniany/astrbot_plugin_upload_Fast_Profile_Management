@@ -1,0 +1,6 @@
+name: plugin_upload_Fast_Profile_Management # 插件唯一识别名，以 astrbot_plugin_ 前缀开头
+display_name: 快捷人格管理器 # 用于展示的名字，可以是方便人类阅读的名字（需要版本 >= v4.5.0，低版本不会报错，请放心填写）
+desc: 支持快捷人格操作，包括查看当前人格（列表），切换人格，添加删除人格等等，仅限管理员使用，支持插件页面配置功能。 # 插件简短描述
+version: v1.0.0 # 插件版本号。格式：v1.1.1 或者 v1.1
+author: 浅月tniay # 作者
+repo: # 插件的仓库地址
