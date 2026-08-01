@@ -1,0 +1,10 @@
+https://docs.astrbot.app/dev/star/guides/listen-message-event.html
+https://docs.astrbot.app/dev/star/plugin-new.html
+https://docs.astrbot.app/dev/star/guides/listen-message-event.html
+https://docs.astrbot.app/dev/star/guides/send-message.html
+https://docs.astrbot.app/dev/star/guides/plugin-config.html
+https://docs.astrbot.app/dev/star/guides/ai.html
+https://docs.astrbot.app/dev/star/guides/storage.html
+https://docs.astrbot.app/dev/star/guides/html-to-pic.html
+https://docs.astrbot.app/dev/star/guides/session-control.html
+https://docs.astrbot.app/dev/star/guides/other.html

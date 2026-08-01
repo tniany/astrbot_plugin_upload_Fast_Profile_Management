@@ -1,0 +1,51 @@
+{
+  "enabled": {
+    "type": "bool",
+    "title": "启用插件",
+    "description": "关闭后本插件的所有命令不响应",
+    "default": true
+  },
+  "admin_ids": {
+    "type": "list",
+    "title": "管理员ID列表",
+    "description": "只有列表中的用户可以使用此插件；留空时由「无管理员时全员可用」决定",
+    "default": []
+  },
+  "allow_all_when_no_admin": {
+    "type": "bool",
+    "title": "无管理员时全员可用",
+    "description": "管理员列表为空时是否允许所有用户使用",
+    "default": true
+  },
+  "protect_default_persona": {
+    "type": "bool",
+    "title": "保护默认人格",
+    "description": "禁止删除/重命名 default 人格（删除命令加 --force 可绕过）",
+    "default": true
+  },
+  "page_size": {
+    "type": "int",
+    "title": "列表每页数量",
+    "description": "人格列表分页大小（1-50）",
+    "default": 10
+  },
+  "max_persona_name_length": {
+    "type": "int",
+    "title": "人格名称最大长度",
+    "description": "创建/导入/重命名时的人格名称长度上限",
+    "default": 32
+  },
+  "max_prompt_length": {
+    "type": "int",
+    "title": "人格描述最大长度",
+    "description": "system prompt 的最大长度",
+    "default": 2000
+  },
+  "allow_llm_assist": {
+    "type": "bool",
+    "title": "允许 LLM 辅助",
+    "description": "启用「/人格 推荐」等 AI 辅助生成功能",
+    "default": true
+  }
+}
+
