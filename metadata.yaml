@@ -3,5 +3,4 @@ display_name: 快捷人格管理器 # 用于展示的名字
 desc: 功能全面的人格管理器：双语命令，支持人格增删改查、复制重命名、导入导出、文件夹、会话对话管理、统计与 LLM 辅助生成，并支持插件页面配置与权限控制。
 version: v2.0.0 # 插件版本号
 author: 浅月tniay # 作者
-repo: https://github.com/tniay/plugin_upload_Fast_Profile_Management # 插件的仓库地址
-
+repo: https://github.com/tniany/plugin_upload_Fast_Profile_Management # 插件的仓库地址

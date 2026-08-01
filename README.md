@@ -1,7 +1,7 @@
 # 快捷人格管理器 (Fast Profile Management)
 
-![GitHub license](https://img.shields.io/github/license/tniay/plugin_upload_Fast_Profile_Management)
-![GitHub release](https://img.shields.io/github/v/release/tniay/plugin_upload_Fast_Profile_Management)
+![GitHub license](https://img.shields.io/github/license/tniany/plugin_upload_Fast_Profile_Management)
+![GitHub release](https://img.shields.io/github/v/release/tniany/plugin_upload_Fast_Profile_Management)
 
 一个功能全面的 AstrBot 人格管理插件：支持双语命令（/profile 与 /人格）、人格增删改查、复制重命名、导入导出、文件夹管理、会话对话管理、统计与 LLM 辅助生成，并内置基于插件配置的权限控制。
 
